@@ -4,8 +4,11 @@ import 'package:shopping_list_app/models/shopping_item.dart';
 import 'package:shopping_list_app/repository/shopping_list_repository.dart';
 import 'package:shopping_list_app/screens/app_screen.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -21,7 +24,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 
 class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
   final ShoppingListRepository repository;
@@ -43,8 +45,8 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
 
   Future<void> addItem(String name) async {
     final item = ShoppingItem(id: _uuid.v4(), name: name, isChecked: false);
-    state = [item, ...state];
     await repository.addItem(item);
+    state = [item, ...state];    
   }
 
   Future<void> toggleItem(String id) async {
