@@ -62,5 +62,24 @@ void main() {
       final items = container.read(shoppingListProvider);
       expect(items, isEmpty);
     });
+
+    test('newly added items appear at the top of the list', () {
+  final notifier = container.read(shoppingListProvider.notifier);
+
+  // Add first item
+  notifier.addItem('Apples');
+  var items = container.read(shoppingListProvider);
+  expect(items.length, 1);
+  expect(items.first.name, 'Apples');
+
+  // Add second item
+  notifier.addItem('Bananas');
+  items = container.read(shoppingListProvider);
+
+  expect(items.length, 2);
+  expect(items.first.name, 'Bananas');
+  expect(items.last.name, 'Apples');
+});
+
   });
 }
