@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shopping_list_app/main.dart';
+import 'package:shopping_list_app/models/shopping_item.dart';
+import 'package:shopping_list_app/providers/providers.dart';
 import 'helpers/fake_repository.dart';
 
 void main() {

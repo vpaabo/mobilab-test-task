@@ -1,4 +1,4 @@
-import 'package:shopping_list_app/main.dart';
+import 'package:shopping_list_app/models/shopping_item.dart';
 import 'package:shopping_list_app/repository/shopping_list_repository.dart';
 
 class FakeShoppingListRepository extends ShoppingListRepository {

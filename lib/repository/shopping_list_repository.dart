@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../main.dart';
+import 'package:shopping_list_app/models/shopping_item.dart';
 
 class ShoppingListRepository {
   final String baseUrl;
