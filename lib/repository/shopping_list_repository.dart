@@ -33,8 +33,8 @@ class ShoppingListRepository {
   }
 
   Future<void> addItem(ShoppingItem item) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/items.json'),
+    final response = await http.put(
+      Uri.parse('$baseUrl/items/${item.id}.json'),
       body: json.encode({
         'name': item.name,
         'isChecked': item.isChecked,
