@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shopping_list_app/repos/shopping_list_repository.dart';
+import 'package:shopping_list_app/repository/shopping_list_repository.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -98,15 +98,21 @@ void showMessage(BuildContext context, String message) {
 /// ----------
 /// Provider
 /// ----------
+
+final shoppingListRepositoryProvider =
+    Provider<ShoppingListRepository>((ref) {
+  return ShoppingListRepository(
+    baseUrl:
+        'https://shopping-list-app-f36c7-default-rtdb.europe-west1.firebasedatabase.app/',
+  );
+});
+
 final shoppingListProvider =
     StateNotifierProvider<ShoppingListNotifier, List<ShoppingItem>>(
-      (ref) => ShoppingListNotifier(
-        repository: ShoppingListRepository(
-          baseUrl:
-              'https://shopping-list-app-f36c7-default-rtdb.europe-west1.firebasedatabase.app/',
-        ),
-      ),
-    );
+  (ref) => ShoppingListNotifier(
+    repository: ref.watch(shoppingListRepositoryProvider),
+  ),
+);
 
 /// ----------
 /// UI
@@ -115,8 +121,7 @@ class ShoppingListScreen extends ConsumerStatefulWidget {
   const ShoppingListScreen({super.key});
 
   @override
-  ConsumerState<ShoppingListScreen> createState() =>
-      _ShoppingListScreenState();
+  ConsumerState<ShoppingListScreen> createState() => _ShoppingListScreenState();
 }
 
 class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
