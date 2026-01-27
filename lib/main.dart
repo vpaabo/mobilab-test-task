@@ -49,40 +49,37 @@ class ShoppingItem {
   }
 }
 
-
 /// ----------
 /// State Notifier
 /// ----------
 class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
   final ShoppingListRepository repository;
+  final _uuid = const Uuid();
 
   ShoppingListNotifier({required this.repository}) : super([]) {
     _loadFromFirebase();
   }
 
-  final _uuid = const Uuid();
-
   Future<void> _loadFromFirebase() async {
     try {
       state = await repository.fetchList();
-    } catch (_) {
-      state = [];
-    }
+    } catch (_) {}
+  }
+
+  Future<void> refresh() async {
+    state = await repository.fetchList();
   }
 
   Future<void> addItem(String name) async {
     final item = ShoppingItem(id: _uuid.v4(), name: name, isChecked: false);
-    state = [item, ...state];
+    state = [item, ...state]; // new item at top
     await repository.addItem(item);
   }
 
   Future<void> toggleItem(String id) async {
     state = [
       for (final item in state)
-        if (item.id == id)
-          item.copyWith(isChecked: !item.isChecked)
-        else
-          item
+        if (item.id == id) item.copyWith(isChecked: !item.isChecked) else item,
     ];
     final updatedItem = state.firstWhere((item) => item.id == id);
     await repository.updateItem(updatedItem);
@@ -93,17 +90,19 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
     await repository.removeItem(id);
   }
 }
+
 /// ----------
 /// Provider
 /// ----------
 final shoppingListProvider =
     StateNotifierProvider<ShoppingListNotifier, List<ShoppingItem>>(
-  (ref) => ShoppingListNotifier(
-    repository: ShoppingListRepository(
-      baseUrl: 'https://shopping-list-app-f36c7-default-rtdb.europe-west1.firebasedatabase.app/',
-    ),
-  ),
-);
+      (ref) => ShoppingListNotifier(
+        repository: ShoppingListRepository(
+          baseUrl:
+              'https://shopping-list-app-f36c7-default-rtdb.europe-west1.firebasedatabase.app/',
+        ),
+      ),
+    );
 
 /// ----------
 /// UI
@@ -117,7 +116,18 @@ class ShoppingListScreen extends ConsumerWidget {
     final controller = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Shopping List')),
+      appBar: AppBar(
+        title: const Text('Shopping List'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              ref.read(shoppingListProvider.notifier).refresh();
+            },
+          ),
+        ],
+      ),
+
       body: Column(
         children: [
           Padding(
@@ -127,8 +137,7 @@ class ShoppingListScreen extends ConsumerWidget {
                 Expanded(
                   child: TextField(
                     controller: controller,
-                    decoration:
-                        const InputDecoration(labelText: 'Add item'),
+                    decoration: const InputDecoration(labelText: 'Add item'),
                   ),
                 ),
                 const SizedBox(width: 8),
