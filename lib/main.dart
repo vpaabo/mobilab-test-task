@@ -72,7 +72,7 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
 
   Future<void> addItem(String name) async {
     final item = ShoppingItem(id: _uuid.v4(), name: name, isChecked: false);
-    state = [item, ...state]; // new item at top
+    state = [item, ...state];
     await repository.addItem(item);
   }
 
@@ -89,6 +89,10 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
     state = state.where((item) => item.id != id).toList();
     await repository.removeItem(id);
   }
+}
+
+void showMessage(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
 /// ----------
@@ -108,7 +112,7 @@ final shoppingListProvider =
 /// UI
 /// ----------
 class ShoppingListScreen extends ConsumerStatefulWidget {
-  const ShoppingListScreen({Key? key}) : super(key: key);
+  const ShoppingListScreen({super.key});
 
   @override
   ConsumerState<ShoppingListScreen> createState() =>
@@ -140,8 +144,12 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.read(shoppingListProvider.notifier).refresh();
+            onPressed: () async {
+              try {
+                await ref.read(shoppingListProvider.notifier).refresh();
+              } catch (e) {
+                showMessage(context, 'Failed to refresh: $e');
+              }
             },
           ),
         ],
@@ -161,11 +169,17 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.add),
-                  onPressed: () {
+                  onPressed: () async {
                     final text = _controller.text.trim();
                     if (text.isNotEmpty) {
-                      ref.read(shoppingListProvider.notifier).addItem(text);
-                      _controller.clear();
+                      try {
+                        await ref
+                            .read(shoppingListProvider.notifier)
+                            .addItem(text);
+                        _controller.clear();
+                      } catch (e) {
+                        showMessage(context, 'Failed to add item: $e');
+                      }
                     }
                   },
                 ),
@@ -181,25 +195,34 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
                   key: ValueKey(item.id), // prevents checkbox glitches
                   leading: Checkbox(
                     value: item.isChecked,
-                    onChanged: (_) {
-                      ref
-                          .read(shoppingListProvider.notifier)
-                          .toggleItem(item.id);
+                    onChanged: (_) async {
+                      try {
+                        await ref
+                            .read(shoppingListProvider.notifier)
+                            .toggleItem(item.id);
+                      } catch (e) {
+                        showMessage(context, 'Failed to toggle item: $e');
+                      }
                     },
                   ),
                   title: Text(
                     item.name,
                     style: TextStyle(
-                      decoration:
-                          item.isChecked ? TextDecoration.lineThrough : null,
+                      decoration: item.isChecked
+                          ? TextDecoration.lineThrough
+                          : null,
                     ),
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      ref
-                          .read(shoppingListProvider.notifier)
-                          .removeItem(item.id);
+                    onPressed: () async {
+                      try {
+                        await ref
+                            .read(shoppingListProvider.notifier)
+                            .removeItem(item.id);
+                      } catch (e) {
+                        showMessage(context, 'Failed to remove item: $e');
+                      }
                     },
                   ),
                 );
