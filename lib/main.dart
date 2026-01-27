@@ -107,13 +107,32 @@ final shoppingListProvider =
 /// ----------
 /// UI
 /// ----------
-class ShoppingListScreen extends ConsumerWidget {
-  const ShoppingListScreen({super.key});
+class ShoppingListScreen extends ConsumerStatefulWidget {
+  const ShoppingListScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ShoppingListScreen> createState() =>
+      _ShoppingListScreenState();
+}
+
+class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final items = ref.watch(shoppingListProvider);
-    final controller = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -127,7 +146,6 @@ class ShoppingListScreen extends ConsumerWidget {
           ),
         ],
       ),
-
       body: Column(
         children: [
           Padding(
@@ -136,7 +154,7 @@ class ShoppingListScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: controller,
+                    controller: _controller, // persistent controller
                     decoration: const InputDecoration(labelText: 'Add item'),
                   ),
                 ),
@@ -144,10 +162,10 @@ class ShoppingListScreen extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
-                    final text = controller.text.trim();
+                    final text = _controller.text.trim();
                     if (text.isNotEmpty) {
                       ref.read(shoppingListProvider.notifier).addItem(text);
-                      controller.clear();
+                      _controller.clear();
                     }
                   },
                 ),
@@ -160,6 +178,7 @@ class ShoppingListScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final item = items[index];
                 return ListTile(
+                  key: ValueKey(item.id), // prevents checkbox glitches
                   leading: Checkbox(
                     value: item.isChecked,
                     onChanged: (_) {
@@ -171,9 +190,8 @@ class ShoppingListScreen extends ConsumerWidget {
                   title: Text(
                     item.name,
                     style: TextStyle(
-                      decoration: item.isChecked
-                          ? TextDecoration.lineThrough
-                          : null,
+                      decoration:
+                          item.isChecked ? TextDecoration.lineThrough : null,
                     ),
                   ),
                   trailing: IconButton(
