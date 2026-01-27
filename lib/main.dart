@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shopping_list_app/repos/shopping_list_repository.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -29,42 +30,53 @@ class ShoppingItem {
   final String id;
   final String name;
   final bool isChecked;
+  final DateTime createdAt;
 
-  const ShoppingItem({
+  ShoppingItem({
     required this.id,
     required this.name,
     required this.isChecked,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
-  ShoppingItem copyWith({bool? isChecked}) {
+  ShoppingItem copyWith({String? id, String? name, bool? isChecked}) {
     return ShoppingItem(
-      id: id,
-      name: name,
+      id: id ?? this.id,
+      name: name ?? this.name,
       isChecked: isChecked ?? this.isChecked,
+      createdAt: createdAt,
     );
   }
 }
+
 
 /// ----------
 /// State Notifier
 /// ----------
 class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
-  ShoppingListNotifier() : super([]);
+  final ShoppingListRepository repository;
+
+  ShoppingListNotifier({required this.repository}) : super([]) {
+    _loadFromFirebase();
+  }
 
   final _uuid = const Uuid();
 
-  void addItem(String name) {
-    state = [
-      ...state,
-      ShoppingItem(
-        id: _uuid.v4(),
-        name: name,
-        isChecked: false,
-      ),
-    ];
+  Future<void> _loadFromFirebase() async {
+    try {
+      state = await repository.fetchList();
+    } catch (_) {
+      state = [];
+    }
   }
 
-  void toggleItem(String id) {
+  Future<void> addItem(String name) async {
+    final item = ShoppingItem(id: _uuid.v4(), name: name, isChecked: false);
+    state = [item, ...state];
+    await repository.addItem(item);
+  }
+
+  Future<void> toggleItem(String id) async {
     state = [
       for (final item in state)
         if (item.id == id)
@@ -72,19 +84,25 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
         else
           item
     ];
+    final updatedItem = state.firstWhere((item) => item.id == id);
+    await repository.updateItem(updatedItem);
   }
 
-  void removeItem(String id) {
+  Future<void> removeItem(String id) async {
     state = state.where((item) => item.id != id).toList();
+    await repository.removeItem(id);
   }
 }
-
 /// ----------
 /// Provider
 /// ----------
 final shoppingListProvider =
     StateNotifierProvider<ShoppingListNotifier, List<ShoppingItem>>(
-  (ref) => ShoppingListNotifier(),
+  (ref) => ShoppingListNotifier(
+    repository: ShoppingListRepository(
+      baseUrl: 'https://shopping-list-app-f36c7-default-rtdb.europe-west1.firebasedatabase.app/',
+    ),
+  ),
 );
 
 /// ----------

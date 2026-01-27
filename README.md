@@ -12,7 +12,8 @@ This project is implemented as part of a technical assignment for Mobi Lab.
 
 * Flutter application
 * Tested on **Android Emulator Android 16 (API 36)**
-* The architecture allows easy extension to iOS
+* The application is built with Flutter using platform-agnostic architecture.
+While development and testing were performed on Android, no Android-specific APIs are used, and the app is expected to work on iOS without code changes.
 
 ---
 
