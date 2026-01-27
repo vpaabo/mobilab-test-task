@@ -2,7 +2,7 @@
 
 ## Goal of the application
 
-The goal of this application is to provide a simple, mobile-friendly shopping list that helps users keep track of items they need to buy. Users can add items, mark them as collected, delete them, and share the same list state across multiple devices in the future via a cloud backend.
+The goal of this application is to provide a simple, mobile-friendly shopping list that helps users keep track of items they need to buy. Users can add items, mark them as collected, delete them, and share the same list state across multiple devices via a cloud backend.
 
 This project is implemented as part of a technical assignment for Mobi Lab.
 
@@ -11,9 +11,8 @@ This project is implemented as part of a technical assignment for Mobi Lab.
 ## Supported platform
 
 * Flutter application
-* Tested on **Android Emulator Android 16 (API 36)**
-* The application is built with Flutter using platform-agnostic architecture.
-While development and testing were performed on Android, no Android-specific APIs are used, and the app is expected to work on iOS without code changes.
+* Tested on **Android Emulator Android 16.0 (API 36)**
+* The architecture is platform-agnostic and can be extended to iOS without code changes (iOS testing requires macOS)
 
 ---
 
@@ -31,7 +30,6 @@ While development and testing were performed on Android, no Android-specific API
 
 ```bash
 git clone https://github.com/vpaabo/mobilab-test-task
-cd shopping_list_app
 ```
 
 2. Install dependencies:
@@ -67,16 +65,16 @@ The application follows a simple and clean architecture:
 * **UI layer**: Flutter widgets responsible only for rendering and user interaction
 * **State management**: Riverpod (`StateNotifier`) is used to manage application state
 * **Domain model**: Immutable `ShoppingItem` model
-
-Business logic is isolated from the UI, making it easy to test and later extend with a cloud data source.
+* **Repository layer**: Handles cloud communication (Firebase Realtime Database via REST API)
 
 ---
 
-## Data storage
+## Data storage and syncing
 
-Currently, the application uses in-memory state for simplicity.
-
-The codebase is structured so that a cloud-backed data source (e.g. Firebase Realtime Database via REST API) can be added later without changing the UI layer.
+* The shopping list is stored in **Firebase Realtime Database**.
+* Items include a `createdAt` timestamp, allowing consistent **newest-first ordering**.
+* The app auto-polls Firebase for near real-time updates every 5 seconds.
+* Multiple devices accessing the same database see a synchronized list when refreshed or polled.
 
 ---
 
@@ -88,6 +86,7 @@ The codebase is structured so that a cloud-backed data source (e.g. Firebase Rea
   * Adding items
   * Toggling items
   * Removing items
+  * Ensuring newest-first order is maintained
 
 ---
 
@@ -97,9 +96,10 @@ The codebase is structured so that a cloud-backed data source (e.g. Firebase Rea
 * Riverpod
 * Git (version control from project start)
 * Android Emulator
+* Firebase Realtime Database (REST API)
 
 ---
 
 ## Notes
 
-* No user authentication is implemented; the same data model is intended to be shared across instances once cloud sync is added
+* No user authentication is implemented; the same data model is shared across instances.
