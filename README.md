@@ -2,17 +2,16 @@
 
 ## Goal of the application
 
-The goal of this application is to provide a simple, mobile-friendly shopping list that helps users keep track of items they need to buy. Users can add items, mark them as collected, delete them, and share the same list state across multiple devices via a cloud backend.
+This application provides a simple  shopping list that helps users track items they need to buy. Users can:
 
-This project is implemented as part of a technical assignment for Mobi Lab.
+* Add items
+* Check/uncheck items as collected
+* Delete items
+* Share the same list state across multiple devices via a cloud backend
 
----
+The shopping list is synchronized via **Firebase Realtime Database**, allowing multiple users to view and update the list collaboratively.
 
-## Supported platform
-
-* Flutter application
-* Tested on **Android Emulator Android 16.0 (API 36)**
-* The architecture is platform-agnostic and can be extended to iOS without code changes (iOS testing requires macOS)
+This project was implemented as part of a technical assignment for **Mobi Lab**.
 
 ---
 
@@ -21,7 +20,7 @@ This project is implemented as part of a technical assignment for Mobi Lab.
 ### Prerequisites
 
 * Flutter SDK (stable channel)
-* Android Studio with Android SDK and emulator
+* Android Studio with Android SDK and emulator (or a physical device)
 * Git
 
 ### Steps
@@ -30,27 +29,39 @@ This project is implemented as part of a technical assignment for Mobi Lab.
 
 ```bash
 git clone https://github.com/vpaabo/mobilab-test-task
+
 ```
 
-2. Install dependencies:
+2. Navigate to the project directory:
+
+```bash
+cd mobilab-test-task
+
+```
+
+3. Install dependencies:
 
 ```bash
 flutter pub get
+
 ```
 
-3. Run the application on an emulator or connected device:
+4. Run the application on an emulator or connected device:
 
 ```bash
 flutter run
+
 ```
 
 ---
 
-## How to run tests
+## How to run tests for the application
 
-Unit tests are provided for the business logic layer.
+Unit tests are provided for the business logic and repository layers.
 
-Run all tests with:
+### Run all tests
+
+From the project root, execute:
 
 ```bash
 flutter test
@@ -58,48 +69,25 @@ flutter test
 
 ---
 
-## Architecture overview
+## Overall Architecture
 
-The application follows a simple and clean architecture:
+The application follows a clean and modular architecture:
 
-* **UI layer**: Flutter widgets responsible only for rendering and user interaction
-* **State management**: Riverpod (`StateNotifier`) is used to manage application state
-* **Domain model**: Immutable `ShoppingItem` model
-* **Repository layer**: Handles cloud communication (Firebase Realtime Database via REST API)
+* **UI Layer**: Flutter widgets handle rendering and user interactions.
+* **State Management**: Riverpod's `StateNotifier` is used for managing the shopping list state.
+* **Domain Model**: Immutable `ShoppingItem` class represents individual list items.
+* **Repository Layer**: Handles cloud communication via Firebase Realtime Database REST API.
+* **Testing**: Business logic and repository operations are covered with unit tests using fake repositories where appropriate.
 
----
-
-## Data storage and syncing
-
-* The shopping list is stored in **Firebase Realtime Database**.
-* Items include a `createdAt` timestamp, allowing consistent **newest-first ordering**.
-* The app auto-polls Firebase for near real-time updates every 5 seconds.
-* Multiple devices accessing the same database see a synchronized list when refreshed or polled.
-
----
-
-## Testing
-
-* Unit tests cover the core shopping list logic:
-
-  * Initial state
-  * Adding items
-  * Toggling items
-  * Removing items
-  * Ensuring newest-first order is maintained
-
----
-
-## Tooling
-
-* Flutter
-* Riverpod
-* Git (version control from project start)
-* Android Emulator
-* Firebase Realtime Database (REST API)
+This separation ensures maintainability, testability, and platform independence for both Android and iOS.
 
 ---
 
 ## Notes
 
-* No user authentication is implemented; the same data model is shared across instances.
+* No user authentication is implemented,s the same data model is shared across instances.
+* Extra to the required functionality, I added
+  * `createdAt` field to `ShoppingItem` so the entries could be ordered. 
+  * `snackBar` error message handling, which is sadly untested as I couldn't simulate the errors well enough
+* The UI is rather simple, so I did not see a need for separate UI tests. 
+* I have not used Flutter/Dart before nor coded Android apps, so this project is mostly made using help of AI (I also mentioned this in the interview)
