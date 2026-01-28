@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shopping List',
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(brightness: Brightness.dark, primarySwatch: Colors.blue),
       home: const ShoppingListScreen(),
     );
   }
@@ -46,7 +46,7 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
   Future<void> addItem(String name) async {
     final item = ShoppingItem(id: _uuid.v4(), name: name, isChecked: false);
     await repository.addItem(item);
-    state = [item, ...state];    
+    state = [item, ...state];
   }
 
   Future<void> toggleItem(String id) async {

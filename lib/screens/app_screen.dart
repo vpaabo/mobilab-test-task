@@ -33,15 +33,26 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
       appBar: AppBar(
         title: const Text('Shopping List'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () async {
-              try {
-                await ref.read(shoppingListProvider.notifier).refresh();
-              } catch (e) {
-                showMessage(context, 'Failed to refresh: $e');
-              }
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 25.0),
+            child: Material(
+              shape: const CircleBorder(),
+              color: Theme.of(context).colorScheme.secondary, // highlight color
+              child: IconButton(
+                iconSize: 28, // make the icon bigger
+                icon: Icon(
+                  Icons.refresh,
+                  color: Theme.of(context).colorScheme.onSecondary, // dark icon
+                ),
+                onPressed: () async {
+                  try {
+                    await ref.read(shoppingListProvider.notifier).refresh();
+                  } catch (e) {
+                    showMessage(context, 'Failed to refresh: $e');
+                  }
+                },
+              ),
+            ),
           ),
         ],
       ),
